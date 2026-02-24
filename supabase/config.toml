@@ -1,0 +1,4 @@
+project_id = "isqejwvgjftsqngptvpz"
+
+[functions.extract-skills]
+verify_jwt = false
