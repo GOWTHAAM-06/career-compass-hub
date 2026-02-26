@@ -31,7 +31,9 @@ I am currently migrating the automated AI extraction triggers to a production en
 ---
 
 ## 📸 Demo
-![Dashboard Screenshot]
+![Dashboard Screenshot][img width="960" height="445" alt="Image" src="https://github.com/user-attachments/assets/cee1cd15-7d62-4472-9124-bdf142d61adb" /]
+
+---
 
 ### 👥 The Team
 * **GOWTHAAM L :** Lead Software Engineer (Architecture, Database & Frontend)
