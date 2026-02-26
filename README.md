@@ -30,6 +30,9 @@ I am currently migrating the automated AI extraction triggers to a production en
 
 ---
 
+## 📸 Demo
+![Dashboard Screenshot]
+
 ### 👥 The Team
 * **GOWTHAAM L :** Lead Software Engineer (Architecture, Database & Frontend)
 * **YAMINE P :** Product Strategy & Research
