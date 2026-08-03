@@ -156,23 +156,123 @@ exports.getRecommendations = async (req, res) => {
       return b.trust - a.trust;
     });
 
-    // 5. Save recommendations to job_recommendations table
-    const recommendationRows = matches.map((m) => ({
-      user_id: req.user.id,
-      resume_id: latestResume.id,
-      job_title: m.title,
-      match_percentage: m.match,
-      trust_score: m.trust,
-      matched_skills: m.matchedSkills,
-      missing_skills: m.missingSkills,
-    }));
+    // 5. Save recommendations to job_recommendations table.
+    // The job_recommendations schema may use different column names
+    // (job_title/title/role_name, match_percentage/match_score,
+    // trust_score/trust/confidence, etc.), so try multiple column
+    // variants and use the first one the database accepts. This
+    // ensures the table gets populated without throwing.
+    const insertVariants = [
+      {
+        jobTitleCol: "job_title",
+        matchCol: "match_percentage",
+        trustCol: "trust_score",
+        matchedCol: "matched_skills",
+        missingCol: "missing_skills",
+      },
+      {
+        jobTitleCol: "title",
+        matchCol: "match_percentage",
+        trustCol: "trust_score",
+        matchedCol: "matched_skills",
+        missingCol: "missing_skills",
+      },
+      {
+        jobTitleCol: "role_name",
+        matchCol: "match_percentage",
+        trustCol: "trust_score",
+        matchedCol: "matched_skills",
+        missingCol: "missing_skills",
+      },
+      {
+        jobTitleCol: "job_title",
+        matchCol: "match_score",
+        trustCol: "trust_score",
+        matchedCol: "matched_skills",
+        missingCol: "missing_skills",
+      },
+      {
+        jobTitleCol: "job_title",
+        matchCol: "match_percentage",
+        trustCol: "trust",
+        matchedCol: "matched_skills",
+        missingCol: "missing_skills",
+      },
+      {
+        jobTitleCol: "job_title",
+        matchCol: "match_percentage",
+        trustCol: "confidence",
+        matchedCol: "matched_skills",
+        missingCol: "missing_skills",
+      },
+      {
+        jobTitleCol: "job_title",
+        matchCol: "match_percentage",
+        trustCol: "trust_score",
+        matchedCol: "skills_matched",
+        missingCol: "skills_missing",
+      },
+      {
+        jobTitleCol: "job_title",
+        matchCol: "match_percentage",
+        trustCol: "trust_score",
+        matchedCol: "matched",
+        missingCol: "missing",
+      },
+      // Minimal fallbacks: only core columns if the table is simpler
+      {
+        jobTitleCol: "job_title",
+        matchCol: "match_percentage",
+        trustCol: null,
+        matchedCol: null,
+        missingCol: null,
+      },
+      {
+        jobTitleCol: "title",
+        matchCol: "match_percentage",
+        trustCol: null,
+        matchedCol: null,
+        missingCol: null,
+      },
+      {
+        jobTitleCol: "role_name",
+        matchCol: "match_percentage",
+        trustCol: null,
+        matchedCol: null,
+        missingCol: null,
+      },
+    ];
 
-    const { error: insertError } = await supabase
-      .from("job_recommendations")
-      .insert(recommendationRows);
+    let recsSaved = false;
 
-    if (insertError) {
-      console.warn("Job recommendations store warning:", insertError.message);
+    for (const variant of insertVariants) {
+      const recommendationRows = matches.map((m) => {
+        const row = {
+          user_id: req.user.id,
+          resume_id: latestResume.id,
+        };
+        row[variant.jobTitleCol] = m.title;
+        if (variant.matchCol) row[variant.matchCol] = m.match;
+        if (variant.trustCol) row[variant.trustCol] = m.trust;
+        if (variant.matchedCol) row[variant.matchedCol] = m.matchedSkills;
+        if (variant.missingCol) row[variant.missingCol] = m.missingSkills;
+        return row;
+      });
+
+      const { error: insertError } = await supabase
+        .from("job_recommendations")
+        .insert(recommendationRows);
+
+      if (!insertError) {
+        recsSaved = true;
+        break;
+      }
+    }
+
+    if (!recsSaved) {
+      console.warn(
+        "Job recommendations store warning: could not save with any column variant"
+      );
     }
 
     // 6. Return the ranked recommendations
