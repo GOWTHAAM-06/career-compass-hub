@@ -1,6 +1,6 @@
 const fs = require("fs");
 const path = require("path");
-const pdfParse = require("pdf-parse");
+const { PDFParse } = require("pdf-parse");
 const supabase = require("../utils/supabaseClient");
 
 exports.extractText = async (req, res) => {
@@ -17,7 +17,10 @@ exports.extractText = async (req, res) => {
     }
 
     const fileBuffer = fs.readFileSync(filePath);
-    const data = await pdfParse(fileBuffer);
+
+    // pdf-parse v2 API: instantiate PDFParse with options, then call getText()
+    const parser = new PDFParse({ data: fileBuffer });
+    const result = await parser.getText({ pageJoiner: "\n" });
 
     // Store in Supabase (guarded against missing config)
     let resumeId = null;
@@ -27,7 +30,7 @@ exports.extractText = async (req, res) => {
         .insert({
           user_id: req.user.id,
           file_name: req.file.originalname,
-          extracted_text: data.text,
+          extracted_text: result.text,
         })
         .select("id")
         .maybeSingle();
@@ -44,7 +47,7 @@ exports.extractText = async (req, res) => {
 
     return res.json({
       message: "Resume text extracted successfully",
-      text: data.text,
+      text: result.text,
       resumeId,
     });
   } catch (error) {
@@ -52,7 +55,7 @@ exports.extractText = async (req, res) => {
     if (req.file && fs.existsSync(req.file.path)) {
       fs.unlinkSync(req.file.path);
     }
-    console.error("Resume extraction error:", error);
+    console.error("Resume extraction error:", error.message);
     return res.status(500).json({ message: "Failed to extract resume text" });
   }
 };

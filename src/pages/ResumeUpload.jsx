@@ -18,11 +18,9 @@ const ResumeUpload = () => {
     try {
       setLoading(true);
 
-      const res = await API.post("/resume/extract", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      // NOTE: Do NOT set Content-Type manually. Axios/browser must set it
+      // with the correct multipart boundary, or Multer cannot parse the file.
+      const res = await API.post("/resume/extract", formData);
 
       setText(res.data.text);
     } catch (err) {

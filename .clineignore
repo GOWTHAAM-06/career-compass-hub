@@ -1,0 +1,8 @@
+node_modules/
+backend/node_modules/
+backend/uploads/
+.git/
+*.log
+*.pdf
+package-lock.json
+backend/package-lock.json
