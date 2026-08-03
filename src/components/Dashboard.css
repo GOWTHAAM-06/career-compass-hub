@@ -44,12 +44,46 @@
   background: #f0f0f0;
 }
 
-.skills-list span {
+.skills-section {
+  margin-top: 20px;
+}
+
+.skill-category {
+  margin-bottom: 20px;
+}
+
+.skill-category-title {
+  margin: 0 0 10px;
+  font-size: 1rem;
+  color: #333;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid #e6f2ff;
+  padding-bottom: 6px;
+}
+
+.skills-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.skill-badge {
   display: inline-block;
   background: #e6f2ff;
-  margin: 6px;
-  padding: 6px 10px;
-  border-radius: 6px;
+  color: #1e3a8a;
+  margin: 0;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  border: 1px solid #bfdbfe;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.skill-badge:hover {
+  background: #dbeafe;
+  transform: translateY(-1px);
 }
 
 .job-card {

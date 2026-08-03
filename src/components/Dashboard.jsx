@@ -10,6 +10,7 @@ const Dashboard = () => {
 
   const [resume, setResume] = useState(null);
   const [skills, setSkills] = useState([]);
+  const [categories, setCategories] = useState({});
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -36,9 +37,10 @@ const Dashboard = () => {
       // with the correct multipart boundary, or Multer cannot parse the file.
       const res = await API.post("/resume/extract", formData);
 
-      // Backend now returns { text, resumeId } — store raw extracted text
-      // For now, keep the full text; future AI parsing will split into skills
-      setSkills([res.data.text]);
+      // Backend returns { text, resumeId, skills, categories }
+      // skills: [{ name, category }], categories: { Category: [names] }
+      setSkills(res.data.skills || []);
+      setCategories(res.data.categories || {});
     } catch (error) {
       console.error(error);
       setError("Extraction failed. Please try again.");
@@ -106,11 +108,29 @@ const Dashboard = () => {
       {skills.length > 0 && (
         <div className="skills-section">
           <h3>Extracted Skills</h3>
-          <div className="skills-list">
-            {skills.map((skill, index) => (
-              <span key={index}>{skill}</span>
-            ))}
-          </div>
+
+          {Object.keys(categories).length > 0 ? (
+            Object.entries(categories).map(([category, skillNames]) => (
+              <div key={category} className="skill-category">
+                <h4 className="skill-category-title">{category}</h4>
+                <div className="skills-list">
+                  {skillNames.map((skillName, index) => (
+                    <span key={`${category}-${skillName}-${index}`} className="skill-badge">
+                      {skillName}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="skills-list">
+              {skills.map((skill, index) => (
+                <span key={index} className="skill-badge">
+                  {skill.name || skill}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
       )}
 

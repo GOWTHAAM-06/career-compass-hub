@@ -2,6 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const { PDFParse } = require("pdf-parse");
 const supabase = require("../utils/supabaseClient");
+const { extractSkills } = require("../utils/skillExtractor");
 
 exports.extractText = async (req, res) => {
   try {
@@ -22,6 +23,11 @@ exports.extractText = async (req, res) => {
     const parser = new PDFParse({ data: fileBuffer });
     const result = await parser.getText({ pageJoiner: "\n" });
 
+    const extractedText = result.text;
+
+    // Phase 2: Parse raw text into structured skill categories
+    const { skills, categories } = extractSkills(extractedText);
+
     // Store in Supabase (guarded against missing config)
     let resumeId = null;
     if (supabase) {
@@ -30,13 +36,30 @@ exports.extractText = async (req, res) => {
         .insert({
           user_id: req.user.id,
           file_name: req.file.originalname,
-          extracted_text: result.text,
+          extracted_text: extractedText,
         })
         .select("id")
         .maybeSingle();
 
       if (!error && resumeRow) {
         resumeId = resumeRow.id;
+
+        // Save parsed skills linked to this resume
+        if (skills.length > 0) {
+          const skillRows = skills.map((skill) => ({
+            resume_id: resumeId,
+            name: skill.name,
+            category: skill.category,
+          }));
+
+          const { error: skillError } = await supabase
+            .from("skills")
+            .insert(skillRows);
+
+          if (skillError) {
+            console.warn("Skills store warning:", skillError.message);
+          }
+        }
       } else if (error) {
         console.warn("Resume store warning:", error.message);
       }
@@ -47,8 +70,10 @@ exports.extractText = async (req, res) => {
 
     return res.json({
       message: "Resume text extracted successfully",
-      text: result.text,
+      text: extractedText,
       resumeId,
+      skills,
+      categories,
     });
   } catch (error) {
     // Clean up even on error
