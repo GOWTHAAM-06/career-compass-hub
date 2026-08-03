@@ -44,20 +44,48 @@ exports.extractText = async (req, res) => {
       if (!error && resumeRow) {
         resumeId = resumeRow.id;
 
-        // Save parsed skills linked to this resume
+        // Save parsed skills linked to this resume.
+        // The skills table schema may use different column names
+        // (name/skill/skill_name, category/skill_category, or no
+        // category column at all), so try multiple column variants
+        // and fall back gracefully instead of throwing.
         if (skills.length > 0) {
-          const skillRows = skills.map((skill) => ({
-            resume_id: resumeId,
-            name: skill.name,
-            category: skill.category,
-          }));
+          const columnVariants = [
+            { nameCol: "name", categoryCol: "category" },
+            { nameCol: "skill", categoryCol: "skill_category" },
+            { nameCol: "skill_name", categoryCol: "category" },
+            { nameCol: "skill_name", categoryCol: "skill_category" },
+            { nameCol: "skill_name", categoryCol: null },
+            { nameCol: "skill", categoryCol: null },
+            { nameCol: "name", categoryCol: null },
+          ];
 
-          const { error: skillError } = await supabase
-            .from("skills")
-            .insert(skillRows);
+          let skillsSaved = false;
 
-          if (skillError) {
-            console.warn("Skills store warning:", skillError.message);
+          for (const variant of columnVariants) {
+            const skillRows = skills.map((skill) => {
+              const row = { resume_id: resumeId };
+              row[variant.nameCol] = skill.name;
+              if (variant.categoryCol) {
+                row[variant.categoryCol] = skill.category;
+              }
+              return row;
+            });
+
+            const { error: skillError } = await supabase
+              .from("skills")
+              .insert(skillRows);
+
+            if (!skillError) {
+              skillsSaved = true;
+              break;
+            }
+          }
+
+          if (!skillsSaved) {
+            console.warn(
+              "Skills store warning: could not save skills with any column variant"
+            );
           }
         }
       } else if (error) {

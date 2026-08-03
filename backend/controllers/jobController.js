@@ -83,18 +83,46 @@ exports.getRecommendations = async (req, res) => {
       });
     }
 
-    // 2. Fetch skills linked to that resume
-    const { data: skillRows, error: skillsError } = await supabase
-      .from("skills")
-      .select("name")
-      .eq("resume_id", latestResume.id);
+    // 2. Fetch skills linked to that resume.
+    // The skills table schema may use "name", "skill", or "skill_name"
+    // for the skill value, so try each candidate column and use the
+    // first one that the database accepts. This avoids a 500 error if
+    // the column name doesn't match the actual schema.
+    const skillColumnCandidates = ["name", "skill_name", "skill"];
 
-    if (skillsError) {
-      console.error("Skills fetch error:", skillsError.message);
-      return res.status(500).json({ message: "Failed to fetch skills" });
+    let skillRows = null;
+    let skillsError = null;
+    let matchedColumn = null;
+
+    for (const column of skillColumnCandidates) {
+      const { data, error } = await supabase
+        .from("skills")
+        .select(column)
+        .eq("resume_id", latestResume.id);
+
+      if (!error) {
+        skillRows = data;
+        matchedColumn = column;
+        break;
+      }
+
+      skillsError = error;
     }
 
-    const userSkills = (skillRows || []).map((row) => row.name);
+    if (!skillRows) {
+      console.warn("Skills fetch warning:", skillsError?.message);
+      // Graceful fallback: no skills can be read from the database, so
+      // return an empty recommendations list rather than a 500 error.
+      return res.json({
+        message:
+          "Could not read skills from the database. Please re-upload your resume.",
+        resumeId: latestResume.id,
+        userSkills: [],
+        recommendations: [],
+      });
+    }
+
+    const userSkills = (skillRows || []).map((row) => row[matchedColumn] || "");
 
     if (userSkills.length === 0) {
       return res.status(404).json({

@@ -63,7 +63,15 @@ const Dashboard = () => {
       // Fetch real-time dynamic job recommendations from the backend
       const res = await API.get("/jobs/recommendations");
 
-      setJobs(res.data.recommendations || []);
+      const recommendations = res.data.recommendations || [];
+
+      setJobs(recommendations);
+
+      // If the backend returns a friendly message (e.g. no skills found),
+      // surface it to the user instead of a generic error.
+      if (recommendations.length === 0 && res.data.message) {
+        setError(res.data.message);
+      }
     } catch (error) {
       console.error(error);
       setError(
