@@ -9,6 +9,7 @@ require("dotenv").config({ path: path.join(__dirname, ".env") });
 const authRoutes = require("./routes/authRoutes");
 const profileRoutes = require("./routes/profileRoutes");
 const resumeRoutes = require("./routes/resumeRoutes");
+const jobRoutes = require("./routes/jobRoutes");
 
 const app = express();
 
@@ -53,6 +54,7 @@ const uploadLimiter = rateLimit({
 app.use("/api/auth", authLimiter, authRoutes);
 app.use("/api", profileRoutes);
 app.use("/api", uploadLimiter, resumeRoutes);
+app.use("/api", jobRoutes);
 
 // Health check
 app.get("/api/health", (req, res) => {

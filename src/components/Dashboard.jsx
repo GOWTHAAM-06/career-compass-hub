@@ -13,6 +13,7 @@ const Dashboard = () => {
   const [categories, setCategories] = useState({});
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [jobsLoading, setJobsLoading] = useState(false);
   const [error, setError] = useState("");
 
   const handleFileChange = (e) => {
@@ -49,24 +50,29 @@ const Dashboard = () => {
     }
   };
 
-  const handleViewJobs = () => {
+  const handleViewJobs = async () => {
     if (skills.length === 0) {
       alert("Extract skills first");
       return;
     }
 
-    setJobs([
-      {
-        title: "Data Analyst",
-        match: "82%",
-        trust: "90%",
-      },
-      {
-        title: "Machine Learning Intern",
-        match: "76%",
-        trust: "88%",
-      },
-    ]);
+    try {
+      setJobsLoading(true);
+      setError("");
+
+      // Fetch real-time dynamic job recommendations from the backend
+      const res = await API.get("/jobs/recommendations");
+
+      setJobs(res.data.recommendations || []);
+    } catch (error) {
+      console.error(error);
+      setError(
+        error.response?.data?.message ||
+          "Failed to fetch job recommendations. Please try again."
+      );
+    } finally {
+      setJobsLoading(false);
+    }
   };
 
   const handleLogout = () => {
@@ -96,11 +102,16 @@ const Dashboard = () => {
 
       <div className="action-buttons">
         {loading && <p>🤖 AI is analyzing your resume...</p>}
+        {jobsLoading && <p>🔍 Finding the best job matches for you...</p>}
 
-        <button onClick={handleExtractSkills} disabled={loading}>
+        <button onClick={handleExtractSkills} disabled={loading || jobsLoading}>
           Extract Skills
         </button>
-        <button className="secondary" onClick={handleViewJobs} disabled={loading}>
+        <button
+          className="secondary"
+          onClick={handleViewJobs}
+          disabled={loading || jobsLoading}
+        >
           View Job Recommendations
         </button>
       </div>
@@ -115,7 +126,10 @@ const Dashboard = () => {
                 <h4 className="skill-category-title">{category}</h4>
                 <div className="skills-list">
                   {skillNames.map((skillName, index) => (
-                    <span key={`${category}-${skillName}-${index}`} className="skill-badge">
+                    <span
+                      key={`${category}-${skillName}-${index}`}
+                      className="skill-badge"
+                    >
                       {skillName}
                     </span>
                   ))}
@@ -139,9 +153,37 @@ const Dashboard = () => {
           <h3>Recommended Jobs</h3>
           {jobs.map((job, index) => (
             <div key={index} className="job-card">
-              <h4>{job.title}</h4>
-              <p>Match: {job.match}</p>
-              <p>Trust Score: {job.trust}✅ Verified</p>
+              <div className="job-card-header">
+                <h4>{job.title}</h4>
+                <span className="job-match-badge">{job.match}% Match</span>
+              </div>
+              <p className="job-trust">
+                Trust Score: {job.trust}% ✅ Verified
+              </p>
+              {job.matchedSkills && job.matchedSkills.length > 0 && (
+                <div className="job-skills">
+                  <p className="job-skills-label">Matched Skills:</p>
+                  <div className="skills-list">
+                    {job.matchedSkills.map((skill, i) => (
+                      <span key={i} className="skill-badge matched">
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {job.missingSkills && job.missingSkills.length > 0 && (
+                <div className="job-skills">
+                  <p className="job-skills-label">Skills to Improve:</p>
+                  <div className="skills-list">
+                    {job.missingSkills.slice(0, 5).map((skill, i) => (
+                      <span key={i} className="skill-badge missing">
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           ))}
         </div>

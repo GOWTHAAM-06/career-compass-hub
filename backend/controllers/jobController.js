@@ -1,0 +1,161 @@
+const supabase = require("../utils/supabaseClient");
+const { JOB_ROLES } = require("../utils/jobRoles");
+
+/**
+ * Normalize a skill name for matching (lowercase, trim).
+ */
+function normalizeSkill(skill) {
+  return String(skill || "").toLowerCase().trim();
+}
+
+/**
+ * Calculate match percentage between user skills and a job role.
+ * Uses Jaccard-like overlap: matched skills / required skills.
+ * Returns { matchPercentage, matchedSkills, missingSkills }.
+ */
+function calculateMatch(userSkills, role) {
+  const userSkillSet = new Set(userSkills.map(normalizeSkill));
+  const requiredSet = new Set(role.requiredSkills.map(normalizeSkill));
+
+  const matchedSkills = [];
+  const missingSkills = [];
+
+  for (const required of requiredSet) {
+    if (userSkillSet.has(required)) {
+      matchedSkills.push(required);
+    } else {
+      missingSkills.push(required);
+    }
+  }
+
+  const matchPercentage =
+    requiredSet.size > 0
+      ? Math.round((matchedSkills.length / requiredSet.size) * 100)
+      : 0;
+
+  return { matchPercentage, matchedSkills, missingSkills };
+}
+
+/**
+ * Calculate a trust score based on match percentage and skill coverage.
+ * Higher match + more matched skills = higher trust.
+ */
+function calculateTrustScore(matchPercentage, matchedSkillsCount) {
+  // Base trust from match percentage (0-70 points)
+  const matchComponent = Math.round(matchPercentage * 0.7);
+
+  // Skill coverage bonus: up to 30 points for having many matched skills
+  const coverageBonus = Math.min(30, matchedSkillsCount * 3);
+
+  return Math.min(100, matchComponent + coverageBonus);
+}
+
+/**
+ * GET /api/jobs/recommendations
+ * Fetches the user's latest resume skills, computes dynamic job matches,
+ * saves them to job_recommendations, and returns the ranked list.
+ */
+exports.getRecommendations = async (req, res) => {
+  try {
+    if (!supabase) {
+      return res
+        .status(500)
+        .json({ message: "Supabase not configured. Check backend/.env" });
+    }
+
+    // 1. Fetch the user's most recent resume
+    const { data: latestResume, error: resumeError } = await supabase
+      .from("resumes")
+      .select("id")
+      .eq("user_id", req.user.id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (resumeError) {
+      console.error("Resume fetch error:", resumeError.message);
+      return res.status(500).json({ message: "Failed to fetch resume" });
+    }
+
+    if (!latestResume) {
+      return res.status(404).json({
+        message: "No resume found. Please upload and extract skills first.",
+      });
+    }
+
+    // 2. Fetch skills linked to that resume
+    const { data: skillRows, error: skillsError } = await supabase
+      .from("skills")
+      .select("name")
+      .eq("resume_id", latestResume.id);
+
+    if (skillsError) {
+      console.error("Skills fetch error:", skillsError.message);
+      return res.status(500).json({ message: "Failed to fetch skills" });
+    }
+
+    const userSkills = (skillRows || []).map((row) => row.name);
+
+    if (userSkills.length === 0) {
+      return res.status(404).json({
+        message: "No skills found for your resume. Please extract skills first.",
+      });
+    }
+
+    // 3. Compute matches for every predefined job role
+    const matches = JOB_ROLES.map((role) => {
+      const { matchPercentage, matchedSkills, missingSkills } = calculateMatch(
+        userSkills,
+        role
+      );
+      const trustScore = calculateTrustScore(
+        matchPercentage,
+        matchedSkills.length
+      );
+
+      return {
+        title: role.title,
+        match: matchPercentage,
+        trust: trustScore,
+        matchedSkills,
+        missingSkills,
+      };
+    });
+
+    // 4. Sort by match percentage (desc), then trust score (desc)
+    matches.sort((a, b) => {
+      if (b.match !== a.match) return b.match - a.match;
+      return b.trust - a.trust;
+    });
+
+    // 5. Save recommendations to job_recommendations table
+    const recommendationRows = matches.map((m) => ({
+      user_id: req.user.id,
+      resume_id: latestResume.id,
+      job_title: m.title,
+      match_percentage: m.match,
+      trust_score: m.trust,
+      matched_skills: m.matchedSkills,
+      missing_skills: m.missingSkills,
+    }));
+
+    const { error: insertError } = await supabase
+      .from("job_recommendations")
+      .insert(recommendationRows);
+
+    if (insertError) {
+      console.warn("Job recommendations store warning:", insertError.message);
+    }
+
+    // 6. Return the ranked recommendations
+    return res.json({
+      message: "Job recommendations generated successfully",
+      resumeId: latestResume.id,
+      userSkills,
+      recommendations: matches,
+    });
+  } catch (error) {
+    console.error("Job recommendation error:", error.message);
+    return res.status(500).json({ message: "Failed to generate recommendations" });
+  }
+};
