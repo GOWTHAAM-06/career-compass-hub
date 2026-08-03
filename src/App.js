@@ -1,34 +1,44 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import Signup from "./components/Signup";
-import Login from "./components/Login";
-import Dashboard from "./components/Dashboard";
+import AuthPage from "./pages/AuthPage";
+import Dashboard from "./pages/Dashboard";
+import ExtractSkills from "./pages/ExtractSkills";
+import Recommendations from "./pages/Recommendations";
+import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
-import ResumeUpload from "./pages/ResumeUpload";
 
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/signup" />} />
-      <Route path="/signup" element={<Signup />} />
-      <Route path="/login" element={<Login />} />
+      {/* Auth landing */}
+      <Route path="/login" element={<AuthPage />} />
+      <Route path="/auth" element={<AuthPage />} />
 
+      {/* Redirect old routes */}
+      <Route path="/signup" element={<Navigate to="/login" replace />} />
       <Route
         path="/dashboard"
-        element={
-          <ProtectedRoute>
-            <Dashboard />
-          </ProtectedRoute>
-        }
+        element={<Navigate to="/" replace />}
       />
-
       <Route
         path="/resume"
+        element={<Navigate to="/" replace />}
+      />
+
+      {/* Protected app shell with header/drawer */}
+      <Route
         element={
           <ProtectedRoute>
-            <ResumeUpload />
+            <Layout />
           </ProtectedRoute>
         }
-      />
+      >
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/extract-skills" element={<ExtractSkills />} />
+        <Route path="/recommendations" element={<Recommendations />} />
+      </Route>
+
+      {/* Fallback */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
