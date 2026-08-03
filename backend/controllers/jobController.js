@@ -244,6 +244,7 @@ exports.getRecommendations = async (req, res) => {
     ];
 
     let recsSaved = false;
+    let lastInsertError = null;
 
     for (const variant of insertVariants) {
       const recommendationRows = matches.map((m) => {
@@ -267,11 +268,62 @@ exports.getRecommendations = async (req, res) => {
         recsSaved = true;
         break;
       }
+
+      lastInsertError = insertError;
+      console.warn(
+        `Job recommendations insert variant failed (${variant.jobTitleCol}, ${
+          variant.matchCol
+        }, ${variant.trustCol}): ${insertError.message}`
+      );
+    }
+
+    // Self-healing fallback: if the table doesn't exist, attempt to
+    // create it via a Supabase RPC helper function (if one has been
+    // defined in the database). This is best-effort — the SQL migration
+    // in backend/sql/migrations/001_create_job_recommendations.sql is
+    // the authoritative fix.
+    if (!recsSaved && lastInsertError && /does not exist/i.test(lastInsertError.message)) {
+      try {
+        const { error: createError } = await supabase.rpc(
+          "create_job_recommendations_table"
+        );
+        if (!createError) {
+          // Retry once with the preferred column variant
+          const variant = insertVariants[0];
+          const recommendationRows = matches.map((m) => {
+            const row = {
+              user_id: req.user.id,
+              resume_id: latestResume.id,
+            };
+            row[variant.jobTitleCol] = m.title;
+            if (variant.matchCol) row[variant.matchCol] = m.match;
+            if (variant.trustCol) row[variant.trustCol] = m.trust;
+            if (variant.matchedCol) row[variant.matchedCol] = m.matchedSkills;
+            if (variant.missingCol) row[variant.missingCol] = m.missingSkills;
+            return row;
+          });
+
+          const { error: retryError } = await supabase
+            .from("job_recommendations")
+            .insert(recommendationRows);
+
+          if (!retryError) {
+            recsSaved = true;
+          } else {
+            lastInsertError = retryError;
+          }
+        }
+      } catch (createErr) {
+        // RPC helper not defined — swallow, migration script is the fix.
+      }
     }
 
     if (!recsSaved) {
       console.warn(
-        "Job recommendations store warning: could not save with any column variant"
+        "Job recommendations store warning: could not save with any column variant. " +
+          `Last error: ${lastInsertError ? lastInsertError.message : "unknown"}. ` +
+          "Run backend/sql/migrations/001_create_job_recommendations.sql in the Supabase SQL Editor " +
+          "to create the job_recommendations table."
       );
     }
 
