@@ -1,0 +1,189 @@
+.apply-page {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  animation: apply-fade 0.5s ease both;
+}
+
+@keyframes apply-fade {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.apply-header h1 {
+  font-size: 1.9rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  background: linear-gradient(135deg, #a5b4fc, #e879f9);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 6px;
+}
+
+.apply-subtitle {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
+.apply-role {
+  color: var(--text-primary);
+}
+
+.back-btn {
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 6px 0;
+  margin-bottom: 12px;
+  transition: color var(--transition-fast), transform var(--transition-fast);
+}
+
+.back-btn:hover {
+  color: var(--text-primary);
+  transform: translateX(-3px);
+}
+
+/* ---------- Platform launcher cards ---------- */
+.apply-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 18px;
+}
+
+.apply-card {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  transition: transform var(--transition-smooth), background var(--transition-fast), border-color var(--transition-fast);
+  position: relative;
+  overflow: hidden;
+}
+
+.apply-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--platform-color);
+  opacity: 0.7;
+  transition: opacity var(--transition-fast);
+}
+
+.apply-card:hover {
+  transform: translateY(-4px);
+  background: var(--bg-card-hover);
+  border-color: var(--platform-color);
+}
+
+.apply-card:hover::before {
+  opacity: 1;
+}
+
+.apply-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.apply-icon {
+  font-size: 2.2rem;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
+}
+
+.apply-badge {
+  color: #fff;
+  padding: 5px 14px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.apply-tip {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  flex: 1;
+}
+
+.apply-url-preview {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--glass-border);
+  border-radius: 6px;
+  padding: 6px 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.apply-launch-btn {
+  display: inline-block;
+  text-align: center;
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: var(--platform-color);
+  color: #fff;
+  font-size: 0.88rem;
+  font-weight: 600;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.apply-card:hover .apply-launch-btn {
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+/* ---------- Tip banner ---------- */
+.apply-tip-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 24px 28px;
+  background: linear-gradient(
+    135deg,
+    rgba(99, 102, 241, 0.12),
+    rgba(16, 185, 129, 0.06)
+  );
+}
+
+.tip-icon {
+  font-size: 1.8rem;
+  flex-shrink: 0;
+}
+
+.apply-tip-banner h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+
+.apply-tip-banner p {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.apply-tip-banner p strong {
+  color: var(--text-primary);
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 640px) {
+  .apply-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -3,6 +3,8 @@ import AuthPage from "./pages/AuthPage";
 import Dashboard from "./pages/Dashboard";
 import ExtractSkills from "./pages/ExtractSkills";
 import Recommendations from "./pages/Recommendations";
+import SkillGapPage from "./pages/SkillGapPage";
+import JobApplyPage from "./pages/JobApplyPage";
 import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -35,6 +37,8 @@ function App() {
         <Route path="/" element={<Dashboard />} />
         <Route path="/extract-skills" element={<ExtractSkills />} />
         <Route path="/recommendations" element={<Recommendations />} />
+        <Route path="/skill-gap/:jobTitle" element={<SkillGapPage />} />
+        <Route path="/apply/:jobTitle" element={<JobApplyPage />} />
       </Route>
 
       {/* Fallback */}

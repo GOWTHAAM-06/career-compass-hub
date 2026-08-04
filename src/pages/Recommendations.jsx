@@ -43,6 +43,14 @@ const Recommendations = () => {
     return () => clearInterval(timer);
   }, [topMatch]);
 
+  const handleViewSkillGap = (jobTitle) => {
+    navigate(`/skill-gap/${encodeURIComponent(jobTitle)}`);
+  };
+
+  const handleQuickApply = (jobTitle) => {
+    navigate(`/apply/${encodeURIComponent(jobTitle)}`);
+  };
+
   const handleFetchRecommendations = async () => {
     if (!hasSkills && !resumeState.resumeId) {
       setError("Please extract your skills first before analyzing job matches.");
@@ -169,6 +177,21 @@ const Recommendations = () => {
                 </div>
               </div>
             )}
+
+            <div className="top-match-actions">
+              <button
+                className="gradient-btn"
+                onClick={() => handleViewSkillGap(topMatch.title)}
+              >
+                View Skill Gap & Learning Path →
+              </button>
+              <button
+                className="secondary-btn"
+                onClick={() => handleQuickApply(topMatch.title)}
+              >
+                Quick Apply →
+              </button>
+            </div>
           </div>
         </section>
       )}
@@ -223,6 +246,21 @@ const Recommendations = () => {
                     </div>
                   </div>
                 )}
+
+                <div className="rec-card-actions">
+                  <button
+                    className="rec-card-gap-btn"
+                    onClick={() => handleViewSkillGap(job.title)}
+                  >
+                    View Skill Gap & Learning Path →
+                  </button>
+                  <button
+                    className="rec-card-apply-btn"
+                    onClick={() => handleQuickApply(job.title)}
+                  >
+                    Quick Apply →
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -245,24 +283,31 @@ const Recommendations = () => {
       )}
 
       {/* ---------- PLATFORM LAUNCHPAD ---------- */}
-      <section className="launchpad glass-card">
-        <h3 className="launchpad-title">Quick Apply via</h3>
-        <div className="launchpad-grid">
-          {LAUNCHPAD.map((platform) => (
-            <a
-              key={platform.name}
-              href={platform.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="launchpad-item"
-              title={`Search ${platform.name} for ${topMatch?.title || "jobs"}`}
-            >
-              <span className="launchpad-icon">{platform.icon}</span>
-              <span className="launchpad-name">{platform.name}</span>
-            </a>
-          ))}
-        </div>
-      </section>
+      {topMatch && (
+        <section className="launchpad glass-card">
+          <h3 className="launchpad-title">Quick Apply via</h3>
+          <p className="launchpad-subtitle">
+            Launch live job searches for{" "}
+            <strong className="launchpad-role">{topMatch.title}</strong> on your
+            favorite platforms
+          </p>
+          <div className="launchpad-grid">
+            {LAUNCHPAD.map((platform) => (
+              <button
+                key={platform.name}
+                className="launchpad-item"
+                onClick={() =>
+                  navigate(`/apply/${encodeURIComponent(topMatch.title)}`)
+                }
+                title={`Search ${platform.name} for ${topMatch.title}`}
+              >
+                <span className="launchpad-icon">{platform.icon}</span>
+                <span className="launchpad-name">{platform.name}</span>
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 };

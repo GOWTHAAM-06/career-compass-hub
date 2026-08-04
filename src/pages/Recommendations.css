@@ -247,6 +247,13 @@
   gap: 8px;
 }
 
+.top-match-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
 .match-pill {
   display: inline-block;
   padding: 6px 14px;
@@ -367,6 +374,47 @@
   margin-bottom: 6px;
 }
 
+.rec-card-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--glass-border);
+}
+
+.rec-card-gap-btn,
+.rec-card-apply-btn {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  transition: transform var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.rec-card-gap-btn {
+  background: var(--gradient-primary);
+  color: #fff;
+  box-shadow: 0 3px 12px rgba(99, 102, 241, 0.3);
+}
+
+.rec-card-gap-btn:hover {
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45);
+}
+
+.rec-card-apply-btn {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-primary);
+  border: 1px solid var(--glass-border);
+}
+
+.rec-card-apply-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  transform: translateY(-1px);
+}
+
 /* ---------- Empty state ---------- */
 .empty-state {
   padding: 60px 36px;
@@ -403,7 +451,22 @@
   font-size: 1.1rem;
   font-weight: 700;
   color: var(--text-primary);
+  margin-bottom: 6px;
+}
+
+.launchpad-subtitle {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
   margin-bottom: 18px;
+}
+
+.launchpad-role {
+  color: var(--text-primary);
+}
+
+.launchpad-item {
+  cursor: pointer;
+  font-family: inherit;
 }
 
 .launchpad-grid {
