@@ -28,20 +28,20 @@ const Recommendations = () => {
 
   // Animate the top-match gauge needle on mount or when topMatch changes
   useEffect(() => {
-    if (topMatch) {
-      const targetAngle = Math.min(180, Math.round((topMatch.match / 100) * 180));
-      let current = 0;
-      const timer = setInterval(() => {
-        current += Math.max(1, Math.round(targetAngle / 25));
-        if (current >= targetAngle) {
-          current = targetAngle;
-          clearInterval(timer);
-        }
-        setGaugeAngle(current);
-      }, 50);
-      return () => clearInterval(timer);
-    }
-  }, [topMatch?.title, topMatch?.match]);
+    if (!topMatch) return;
+
+    const targetAngle = Math.min(180, Math.round((topMatch.match / 100) * 180));
+    let current = 0;
+    const timer = setInterval(() => {
+      current += Math.max(1, Math.round(targetAngle / 25));
+      if (current >= targetAngle) {
+        current = targetAngle;
+        clearInterval(timer);
+      }
+      setGaugeAngle(current);
+    }, 50);
+    return () => clearInterval(timer);
+  }, [topMatch]);
 
   const handleFetchRecommendations = async () => {
     if (!hasSkills && !resumeState.resumeId) {
