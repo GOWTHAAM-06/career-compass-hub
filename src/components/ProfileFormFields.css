@@ -1,0 +1,119 @@
+.profile-form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  animation: field-fade 0.3s ease both;
+}
+
+@keyframes field-fade {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.profile-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.profile-field label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+.profile-field input,
+.profile-field select,
+.profile-field textarea {
+  width: 100%;
+  padding: 13px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--glass-border);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.profile-field input::placeholder,
+.profile-field textarea::placeholder {
+  color: var(--text-muted);
+}
+
+.profile-field input:focus,
+.profile-field select:focus,
+.profile-field textarea:focus {
+  border-color: var(--accent-1);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.profile-field select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 34px;
+}
+
+.profile-field select option {
+  background: #1e293b;
+  color: var(--text-primary);
+}
+
+.profile-field textarea {
+  resize: vertical;
+  min-height: 70px;
+}
+
+/* ---------- Experienced banner ---------- */
+.experienced-banner {
+  text-align: center;
+  padding: 24px 20px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(
+    135deg,
+    rgba(99, 102, 241, 0.12),
+    rgba(217, 70, 239, 0.08)
+  );
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  animation: field-fade 0.3s ease both;
+}
+
+.experienced-icon {
+  font-size: 2.2rem;
+  display: inline-block;
+  margin-bottom: 10px;
+  animation: exp-float 2.5s ease-in-out infinite;
+}
+
+@keyframes exp-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.experienced-banner h4 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.experienced-banner p {
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}

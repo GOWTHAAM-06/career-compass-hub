@@ -1,9 +1,10 @@
 import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
+import ProfileFormFields, {
+  DEFAULT_PROFILE_DATA,
+} from "./ProfileFormFields";
 import "./AppHeader.css";
-
-const ACADEMIC_ROLES = ["First-Year", "Final-Year", "PG Student", "Researcher"];
 
 const AppHeader = () => {
   const { user, logout, updateProfile } = useContext(AuthContext);
@@ -16,20 +17,16 @@ const AppHeader = () => {
   const profile = user?.profile || {};
 
   const [profileForm, setProfileForm] = useState({
-    academicLevel: profile.academicLevel || "First-Year",
-    targetDomain: profile.targetDomain || "",
-    researchInterests: profile.researchInterests || "",
-    graduationYear: profile.graduationYear || "",
+    ...DEFAULT_PROFILE_DATA,
+    ...profile,
   });
 
   // Hydrate the form whenever the drawer opens with current profile values
   const openDrawer = () => {
     const current = user?.profile || {};
     setProfileForm({
-      academicLevel: current.academicLevel || "First-Year",
-      targetDomain: current.targetDomain || "",
-      researchInterests: current.researchInterests || "",
-      graduationYear: current.graduationYear || "",
+      ...DEFAULT_PROFILE_DATA,
+      ...current,
     });
     setProfileSaved(false);
     setDrawerOpen(true);
@@ -39,8 +36,8 @@ const AppHeader = () => {
     setDrawerOpen(false);
   };
 
-  const handleProfileChange = (e) => {
-    setProfileForm({ ...profileForm, [e.target.name]: e.target.value });
+  const handleProfileChange = (updatedProfile) => {
+    setProfileForm(updatedProfile);
   };
 
   const handleSaveProfile = (e) => {
@@ -123,57 +120,10 @@ const AppHeader = () => {
         </div>
 
         <form className="drawer-form" onSubmit={handleSaveProfile}>
-          <div className="drawer-field">
-            <label htmlFor="academicLevel">Academic Level</label>
-            <select
-              id="academicLevel"
-              name="academicLevel"
-              value={profileForm.academicLevel}
-              onChange={handleProfileChange}
-            >
-              {ACADEMIC_ROLES.map((role) => (
-                <option key={role} value={role}>
-                  {role}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="drawer-field">
-            <label htmlFor="targetDomain">Target Domain</label>
-            <input
-              id="targetDomain"
-              type="text"
-              name="targetDomain"
-              placeholder="e.g. Machine Learning, Full-Stack"
-              value={profileForm.targetDomain}
-              onChange={handleProfileChange}
-            />
-          </div>
-
-          <div className="drawer-field">
-            <label htmlFor="researchInterests">Research Interests</label>
-            <textarea
-              id="researchInterests"
-              name="researchInterests"
-              placeholder="e.g. NLP, Computer Vision, Distributed Systems"
-              rows={3}
-              value={profileForm.researchInterests}
-              onChange={handleProfileChange}
-            />
-          </div>
-
-          <div className="drawer-field">
-            <label htmlFor="graduationYear">Graduation Year</label>
-            <input
-              id="graduationYear"
-              type="text"
-              name="graduationYear"
-              placeholder="e.g. 2027"
-              value={profileForm.graduationYear}
-              onChange={handleProfileChange}
-            />
-          </div>
+          <ProfileFormFields
+            profile={profileForm}
+            onChange={handleProfileChange}
+          />
 
           {profileSaved && (
             <p className="drawer-saved">✓ Profile saved</p>

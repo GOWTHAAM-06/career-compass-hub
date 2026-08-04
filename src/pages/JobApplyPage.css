@@ -146,6 +146,46 @@
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
 }
 
+/* ---------- Direct ATS & Company Career Hubs ---------- */
+.direct-portals-section {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.direct-portals-header {
+  margin-bottom: 0.5rem;
+}
+
+.direct-portals-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.direct-portals-subtitle {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-top: 4px;
+}
+
+.direct-portals-benefit {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: 12px;
+  color: #a7f3d0;
+  font-size: 0.9rem;
+}
+
+.benefit-icon {
+  font-size: 1.2rem;
+}
+
 /* ---------- Tip banner ---------- */
 .apply-tip-banner {
   display: flex;

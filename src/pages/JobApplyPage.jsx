@@ -1,6 +1,67 @@
 import { useParams, useNavigate } from "react-router-dom";
 import "./JobApplyPage.css";
 
+const DIRECT_PORTALS = [
+  {
+    name: "Greenhouse / Lever",
+    icon: "🏢",
+    color: "#10b981",
+    buildUrl: (q) =>
+      `https://www.google.com/search?q=${encodeURIComponent(
+        `site:boards.greenhouse.io OR site:jobs.lever.co "${q}"`
+      )}`,
+    tip: "Google search operator for all Greenhouse/Lever ATS boards",
+  },
+  {
+    name: "Google Careers",
+    icon: "🔍",
+    color: "#4285f4",
+    buildUrl: (q) =>
+      `https://www.google.com/about/careers/applications/jobs/results/?q=${encodeURIComponent(q)}`,
+    tip: "Official Google careers portal with direct listings",
+  },
+  {
+    name: "Microsoft Careers",
+    icon: "🪟",
+    color: "#0f6cbd",
+    buildUrl: (q) =>
+      `https://jobs.careers.microsoft.com/global/en/search?q=${encodeURIComponent(q)}`,
+    tip: "Official Microsoft careers portal",
+  },
+  {
+    name: "Amazon Jobs",
+    icon: "📦",
+    color: "#ff9900",
+    buildUrl: (q) =>
+      `https://www.amazon.jobs/en/search?base_query=${encodeURIComponent(q)}`,
+    tip: "Official Amazon jobs portal with base query search",
+  },
+  {
+    name: "Zoho Careers",
+    icon: "🌐",
+    color: "#e42527",
+    buildUrl: (q) =>
+      `https://www.zoho.com/careers/jobdetails?jobid=${encodeURIComponent(q)}`,
+    tip: "Zoho career portal for direct openings",
+  },
+  {
+    name: "TCS Careers",
+    icon: "💼",
+    color: "#005f9e",
+    buildUrl: (q) =>
+      `https://ibegin.tcs.com/iBegin/jobs/searchresults?jobName=${encodeURIComponent(q)}`,
+    tip: "TCS iBegin portal for direct job search",
+  },
+  {
+    name: "Infosys Careers",
+    icon: "🏛️",
+    color: "#0057a8",
+    buildUrl: (q) =>
+      `https://career.infosys.com/joblist?q=${encodeURIComponent(q)}`,
+    tip: "Infosys career portal for direct openings",
+  },
+];
+
 const PLATFORMS = [
   {
     name: "LinkedIn",
@@ -108,6 +169,58 @@ const JobApplyPage = () => {
           );
         })}
       </div>
+
+      {/* ---------- DIRECT ATS & COMPANY CAREER HUBS ---------- */}
+      <section className="direct-portals-section">
+        <div className="direct-portals-header">
+          <h2 className="direct-portals-title">
+            Direct ATS & Company Career Hubs
+          </h2>
+          <p className="direct-portals-subtitle">
+            Skip LinkedIn/Naukri traffic — apply directly on official company
+            portals
+          </p>
+        </div>
+
+        <div className="direct-portals-benefit glass-card">
+          <span className="benefit-icon">⚡</span>
+          <p>
+            Direct apply portals increase response rates by cutting through
+            high-volume job aggregator traffic.
+          </p>
+        </div>
+
+        <div className="apply-grid direct-grid">
+          {DIRECT_PORTALS.map((portal) => {
+            const url = portal.buildUrl(decodedTitle);
+            return (
+              <a
+                key={portal.name}
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="apply-card glass-card direct-card"
+                style={{ "--platform-color": portal.color }}
+              >
+                <div className="apply-card-top">
+                  <span className="apply-icon">{portal.icon}</span>
+                  <span className="apply-badge" style={{ background: portal.color }}>
+                    {portal.name}
+                  </span>
+                </div>
+
+                <p className="apply-tip">{portal.tip}</p>
+
+                <div className="apply-url-preview">
+                  {url.replace(/^https?:\/\//, "").split("/")[0]}
+                </div>
+
+                <span className="apply-launch-btn">Open Portal →</span>
+              </a>
+            );
+          })}
+        </div>
+      </section>
 
       {/* Tip banner */}
       <div className="apply-tip-banner glass-card">

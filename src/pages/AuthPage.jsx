@@ -2,9 +2,11 @@ import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../api/api";
 import { AuthContext } from "../context/AuthContext";
+import ProfileFormFields, {
+  DEFAULT_PROFILE_DATA,
+  PRIMARY_ROLES,
+} from "../components/ProfileFormFields";
 import "./AuthPage.css";
-
-const ACADEMIC_ROLES = ["First-Year", "Final-Year", "PG Student", "Researcher"];
 
 const AuthPage = () => {
   const [mode, setMode] = useState("signin");
@@ -19,7 +21,8 @@ const AuthPage = () => {
     email: "",
     password: "",
     confirmPassword: "",
-    academicRole: "First-Year",
+    primaryRole: PRIMARY_ROLES[0],
+    profile: { ...DEFAULT_PROFILE_DATA },
   });
 
   const handleSigninChange = (e) => {
@@ -28,6 +31,10 @@ const AuthPage = () => {
 
   const handleSignupChange = (e) => {
     setSignupData({ ...signupData, [e.target.name]: e.target.value });
+  };
+
+  const handleProfileChange = (profile) => {
+    setSignupData((prev) => ({ ...prev, profile }));
   };
 
   const handleSignin = async (e) => {
@@ -65,10 +72,13 @@ const AuthPage = () => {
         password: signupData.password,
       });
 
-      // Store academic role for later profile enrichment
+      // Store the full cascading profile for later enrichment
       localStorage.setItem(
-        "pendingAcademicRole",
-        JSON.stringify(signupData.academicRole)
+        "pendingProfile",
+        JSON.stringify({
+          primaryRole: signupData.profile.primaryRole,
+          ...signupData.profile,
+        })
       );
 
       setError("");
@@ -181,19 +191,11 @@ const AuthPage = () => {
             </div>
 
             <div className="field-group">
-              <label htmlFor="signup-role">Academic Role</label>
-              <select
-                id="signup-role"
-                name="academicRole"
-                value={signupData.academicRole}
-                onChange={handleSignupChange}
-              >
-                {ACADEMIC_ROLES.map((role) => (
-                  <option key={role} value={role}>
-                    {role}
-                  </option>
-                ))}
-              </select>
+              <label>Profile Setup</label>
+              <ProfileFormFields
+                profile={signupData.profile}
+                onChange={handleProfileChange}
+              />
             </div>
 
             <div className="field-group">
