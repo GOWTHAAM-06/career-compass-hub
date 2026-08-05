@@ -148,42 +148,55 @@
 
 /* ---------- Direct ATS & Company Career Hubs ---------- */
 .direct-portals-section {
-  margin-top: 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 18px;
+  margin-top: 8px;
+  padding-top: 8px;
 }
 
-.direct-portals-header {
-  margin-bottom: 0.5rem;
-}
-
-.direct-portals-title {
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: #f8fafc;
+.direct-portals-header h2 {
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  background: linear-gradient(135deg, #34d399, #06b6d4);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 6px;
 }
 
 .direct-portals-subtitle {
   color: var(--text-secondary);
-  font-size: 0.9rem;
-  margin-top: 4px;
+  font-size: 0.92rem;
 }
 
 .direct-portals-benefit {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 14px 20px;
-  background: rgba(16, 185, 129, 0.1);
-  border: 1px solid rgba(16, 185, 129, 0.25);
-  border-radius: 12px;
-  color: #a7f3d0;
-  font-size: 0.9rem;
+  gap: 14px;
+  padding: 16px 20px;
+  background: rgba(16, 185, 129, 0.08);
+  border-color: rgba(16, 185, 129, 0.25);
 }
 
 .benefit-icon {
-  font-size: 1.2rem;
+  font-size: 1.6rem;
+  flex-shrink: 0;
+}
+
+.direct-portals-benefit p {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.direct-grid {
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+
+.direct-card::before {
+  background: var(--platform-color);
 }
 
 /* ---------- Tip banner ---------- */
